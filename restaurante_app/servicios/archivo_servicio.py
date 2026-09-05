@@ -1,5 +1,6 @@
 
 import json
+from pathlib import Path
 
 from modelos.producto import Producto
 from modelos.usuario import Usuario
@@ -8,23 +9,26 @@ from modelos.venta import Venta
 
 class ArchivoServicio:
 
-    def __init__(self, ruta_productos: str) -> None:
-        self.ruta_productos = ruta_productos
-        self.ruta_usuarios = "restaurante_app/datos/usuarios.json"
-        self.ruta_ventas = "restaurante_app/datos/ventas.json"
+    def __init__(self) -> None:
+        # Ruta de la carpeta datos
+        self.ruta_datos = Path(__file__).resolve().parent.parent / "datos"
+
+        self.ruta_productos = self.ruta_datos / "productos.json"
+        self.ruta_usuarios = self.ruta_datos / "usuarios.json"
+        self.ruta_ventas = self.ruta_datos / "ventas.json"
+
+        # Crear la carpeta datos si no existe
+        self.ruta_datos.mkdir(exist_ok=True)
+
+    # =========================
+    # PRODUCTOS
+    # =========================
 
     def guardar_productos(self, productos: list[Producto]) -> None:
-        datos = []
-
-        for producto in productos:
-            datos.append(producto.to_dict())
+        datos = [producto.to_dict() for producto in productos]
 
         try:
-            with open(
-                self.ruta_productos,
-                "w",
-                encoding="utf-8"
-            ) as archivo:
+            with open(self.ruta_productos, "w", encoding="utf-8") as archivo:
                 json.dump(
                     datos,
                     archivo,
@@ -37,14 +41,10 @@ class ArchivoServicio:
 
     def cargar_productos(self) -> list[Producto]:
         try:
-            with open(
-                self.ruta_productos,
-                "r",
-                encoding="utf-8"
-            ) as archivo:
+            with open(self.ruta_productos, "r", encoding="utf-8") as archivo:
                 datos = json.load(archivo)
 
-            productos: list[Producto] = []
+            productos = []
 
             for dato in datos:
                 producto = Producto(
@@ -59,17 +59,10 @@ class ArchivoServicio:
             return productos
 
         except FileNotFoundError:
-            print(
-                "Archivo de productos no encontrado, "
-                "se iniciará sin productos."
-            )
             return []
 
         except json.JSONDecodeError:
-            print(
-                "El archivo de productos está vacío o dañado, "
-                "se iniciará vacío."
-            )
+            print("productos.json está vacío o dañado.")
             return []
 
         except PermissionError:
@@ -80,18 +73,15 @@ class ArchivoServicio:
             print(f"Falta la clave {error} en productos.json.")
             return []
 
-    def guardar_usuarios(self, usuarios: list[Usuario]) -> None:
-        datos = []
+    # =========================
+    # USUARIOS
+    # =========================
 
-        for usuario in usuarios:
-            datos.append(usuario.to_dict())
+    def guardar_usuarios(self, usuarios: list[Usuario]) -> None:
+        datos = [usuario.to_dict() for usuario in usuarios]
 
         try:
-            with open(
-                self.ruta_usuarios,
-                "w",
-                encoding="utf-8"
-            ) as archivo:
+            with open(self.ruta_usuarios, "w", encoding="utf-8") as archivo:
                 json.dump(
                     datos,
                     archivo,
@@ -104,14 +94,10 @@ class ArchivoServicio:
 
     def cargar_usuarios(self) -> list[Usuario]:
         try:
-            with open(
-                self.ruta_usuarios,
-                "r",
-                encoding="utf-8"
-            ) as archivo:
+            with open(self.ruta_usuarios, "r", encoding="utf-8") as archivo:
                 datos = json.load(archivo)
 
-            usuarios: list[Usuario] = []
+            usuarios = []
 
             for dato in datos:
                 usuario = Usuario(
@@ -124,17 +110,10 @@ class ArchivoServicio:
             return usuarios
 
         except FileNotFoundError:
-            print(
-                "Archivo de usuarios no encontrado, "
-                "se iniciará sin usuarios."
-            )
             return []
 
         except json.JSONDecodeError:
-            print(
-                "El archivo de usuarios está vacío o dañado, "
-                "se iniciará vacío."
-            )
+            print("usuarios.json está vacío o dañado.")
             return []
 
         except PermissionError:
@@ -145,18 +124,15 @@ class ArchivoServicio:
             print(f"Falta la clave {error} en usuarios.json.")
             return []
 
-    def guardar_ventas(self, ventas: list[Venta]) -> None:
-        datos = []
+    # =========================
+    # VENTAS
+    # =========================
 
-        for venta in ventas:
-            datos.append(venta.to_dict())
+    def guardar_ventas(self, ventas: list[Venta]) -> None:
+        datos = [venta.to_dict() for venta in ventas]
 
         try:
-            with open(
-                self.ruta_ventas,
-                "w",
-                encoding="utf-8"
-            ) as archivo:
+            with open(self.ruta_ventas, "w", encoding="utf-8") as archivo:
                 json.dump(
                     datos,
                     archivo,
@@ -169,14 +145,10 @@ class ArchivoServicio:
 
     def cargar_ventas(self) -> list[Venta]:
         try:
-            with open(
-                self.ruta_ventas,
-                "r",
-                encoding="utf-8"
-            ) as archivo:
+            with open(self.ruta_ventas, "r", encoding="utf-8") as archivo:
                 datos = json.load(archivo)
 
-            ventas: list[Venta] = []
+            ventas = []
 
             for dato in datos:
                 venta = Venta(
@@ -189,17 +161,10 @@ class ArchivoServicio:
             return ventas
 
         except FileNotFoundError:
-            print(
-                "Archivo de ventas no encontrado, "
-                "se iniciará sin ventas."
-            )
             return []
 
         except json.JSONDecodeError:
-            print(
-                "El archivo de ventas está vacío o dañado, "
-                "se iniciará vacío."
-            )
+            print("ventas.json está vacío o dañado.")
             return []
 
         except PermissionError:

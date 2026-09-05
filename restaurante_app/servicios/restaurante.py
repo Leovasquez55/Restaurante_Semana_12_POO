@@ -1,3 +1,4 @@
+
 from modelos.producto import Producto
 from modelos.usuario import Usuario
 from modelos.venta import Venta
@@ -14,21 +15,32 @@ class Restaurante:
         # Índices auxiliares para búsquedas rápidas
         self.indice_productos: dict[str, Producto] = {}
         self.indice_usuarios: dict[str, Usuario] = {}
+
+        # Índice de ventas agrupadas por usuario
         self.indice_ventas_usuario: dict[str, list[Venta]] = {}
 
+    # =========================
+    # ÍNDICES
+    # =========================
+
     def reconstruir_indices(self) -> None:
-        """Reconstruye los índices a partir de las colecciones principales."""
+        """Reconstruye los índices a partir de las listas principales."""
 
         self.indice_productos.clear()
         self.indice_usuarios.clear()
         self.indice_ventas_usuario.clear()
 
+        # Índice de productos por código
         for producto in self.productos:
-            self.indice_productos[producto.codigo.strip().lower()] = producto
+            clave = producto.codigo.strip().lower()
+            self.indice_productos[clave] = producto
 
+        # Índice de usuarios por identificación
         for usuario in self.usuarios:
-            self.indice_usuarios[usuario.identificacion.strip()] = usuario
+            clave = usuario.identificacion.strip()
+            self.indice_usuarios[clave] = usuario
 
+        # Índice de ventas por usuario
         for venta in self.ventas:
             identificacion = venta.usuario_id.strip()
 
@@ -37,11 +49,17 @@ class Restaurante:
 
             self.indice_ventas_usuario[identificacion].append(venta)
 
+    # =========================
+    # PRODUCTOS
+    # =========================
+
     def registrar_producto(self, producto: Producto) -> None:
         clave = producto.codigo.strip().lower()
 
         if clave in self.indice_productos:
-            raise ValueError("Ya existe un producto con ese codigo.")
+            raise ValueError(
+                "Ya existe un producto con ese codigo."
+            )
 
         self.productos.append(producto)
         self.indice_productos[clave] = producto
@@ -87,6 +105,10 @@ class Restaurante:
     def listar_productos(self) -> list[Producto]:
         return self.productos.copy()
 
+    # =========================
+    # USUARIOS
+    # =========================
+
     def registrar_usuario(self, usuario: Usuario) -> None:
         identificacion = usuario.identificacion.strip()
 
@@ -102,11 +124,56 @@ class Restaurante:
         clave = identificacion.strip()
         return self.indice_usuarios.get(clave)
 
+    def actualizar_usuario(
+        self,
+        identificacion: str,
+        nombre: str,
+        correo: str
+    ) -> bool:
+
+        usuario = self.buscar_usuario(identificacion)
+
+        if usuario is None:
+            return False
+
+        usuario.nombre = nombre
+        usuario.correo = correo
+
+        return True
+
+    def eliminar_usuario(self, identificacion: str) -> bool:
+        usuario = self.buscar_usuario(identificacion)
+
+        if usuario is None:
+            return False
+
+        self.usuarios.remove(usuario)
+
+        clave = usuario.identificacion.strip()
+
+        self.indice_usuarios.pop(clave, None)
+
+        # Eliminar también las ventas asociadas del índice
+        self.indice_ventas_usuario.pop(clave, None)
+
+        return True
+
     def listar_usuarios(self) -> list[Usuario]:
         return self.usuarios.copy()
 
+    # =========================
+    # CATEGORÍAS
+    # =========================
+
     def mostrar_categorias(self) -> set[str]:
-        return {producto.categoria for producto in self.productos}
+        return {
+            producto.categoria
+            for producto in self.productos
+        }
+
+    # =========================
+    # VENTAS
+    # =========================
 
     def vender_producto(
         self,
@@ -121,7 +188,10 @@ class Restaurante:
         if usuario is None or producto is None:
             return False
 
-        if cantidad <= 0 or producto.stock < cantidad:
+        if cantidad <= 0:
+            return False
+
+        if producto.stock < cantidad:
             return False
 
         venta = Venta(
@@ -130,9 +200,13 @@ class Restaurante:
             cantidad
         )
 
+        # Guardar en la colección principal
         self.ventas.append(venta)
+
+        # Actualizar stock
         producto.vender(cantidad)
 
+        # Actualizar índice de ventas por usuario
         identificacion = usuario.identificacion.strip()
 
         if identificacion not in self.indice_ventas_usuario:
@@ -152,7 +226,10 @@ class Restaurante:
 
         identificacion = identificacion_usuario.strip()
 
-        return self.indice_ventas_usuario.get(
+        # Búsqueda directa mediante índice
+        ventas = self.indice_ventas_usuario.get(
             identificacion,
             []
-        ).copy()
+        )
+
+        return ventas.copy()

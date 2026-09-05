@@ -1,16 +1,16 @@
 [
     {
-        "codigo": "p001",
-        "nombre": "hamburgusa",
-        "categoria": "comida rapida",
-        "precio": 5.0,
-        "stock": 5
-    },
-    {
         "codigo": "poo2",
         "nombre": "pizza",
         "categoria": "rapida",
         "precio": 8.0,
         "stock": 15
+    },
+    {
+        "codigo": "poo3",
+        "nombre": "filete",
+        "categoria": "fuerte",
+        "precio": 23.0,
+        "stock": 17
     }
 ]

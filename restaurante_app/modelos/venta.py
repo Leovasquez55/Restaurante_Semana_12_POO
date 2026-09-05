@@ -1,3 +1,4 @@
+
 class Venta:
 
     def __init__(
@@ -9,6 +10,19 @@ class Venta:
         self.usuario_id = usuario_id
         self.producto_codigo = producto_codigo
         self.cantidad = cantidad
+
+    @property
+    def cantidad(self) -> int:
+        return self._cantidad
+
+    @cantidad.setter
+    def cantidad(self, valor: int) -> None:
+        if valor <= 0:
+            raise ValueError(
+                "La cantidad debe ser mayor que cero."
+            )
+
+        self._cantidad = valor
 
     def to_dict(self) -> dict:
         return {
